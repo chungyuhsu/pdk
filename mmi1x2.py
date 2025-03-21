@@ -1,5 +1,5 @@
 import gdspy
-from component import Component
+from .component import Component
 
 class Mmi1x2(Component):
     """

@@ -105,9 +105,3 @@ class Component():
         
         cell.add(self.obj)
         cell.add(label)
-
-if __name__ == "__main__":
-    
-    Component().put('og', (0, 0, 0))
-    
-    gdspy.write_gds('component.gds')
