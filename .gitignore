@@ -1,0 +1,14 @@
+# Ignore everything
+**
+
+# Whitelist only specific file types in all subdirectories
+!**/*.gitignore
+!**/*.gds
+!**/*.py
+!**/*.md
+!**/*.png
+!**/*.txt
+!**/*.pptx
+
+# Allow folder structure so that Git can track the whitelisted files
+!*/
