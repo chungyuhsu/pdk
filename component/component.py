@@ -11,11 +11,11 @@ class Component():
         self.obj = [] # store all gdspy geometric objects
         self.port = {'og': (0, 0, 0)} # (x, y, theta). theta is in degrees.
         # for convenience, keep 'og' to (0, 0, 0)
-        self.layer = [1, 2]
-
+        
         # Draw your design here. Everything respects to port 'og'.
-        rec = gdspy.Rectangle((0, 0), (17.5, 2.5), layer=self.layer[0])
-        text = gdspy.Text('COMPONENT', 2, (1, 0), layer=self.layer[1])
+        layer = [1, 2]
+        rec = gdspy.Rectangle((0, 0), (17.5, 2.5), layer=layer[0])
+        text = gdspy.Text('COMPONENT', 2, (1, 0), layer=layer[1])
         
         # Update self.obj with new objects
         self.obj.append(rec)

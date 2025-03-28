@@ -1,5 +1,5 @@
 import gdspy
-from component.component import Component
+from Gc_fully.Gc_fully import Gc_fully
 
-Component().put('og', (0, 0, 0))
-gdspy.write_gds('component.gds')
+Gc_fully().put('og', (0, 0, 0))
+gdspy.write_gds('Gc_fully.gds')
