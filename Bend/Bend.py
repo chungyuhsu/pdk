@@ -15,17 +15,13 @@ class Bend(Component):
     https://doi.org/10.1364/OE.25.009150
     """
     
-    def __init__(self, radius: float=14, width: float=1.2) -> None:
+    def __init__(self, radius: float=14, width: float=1.2, layer: int=12) -> None:
         
         # Attributes
         self.obj = []
-        self.port = {'og': (0, 0, 0)}
-        self.layer = [12]
-
-        self.radius = radius
-        self.width = width
+        self.port = {}
         
-        # Draw your design here. Everything respects to port 'og'.
+        # Draw your design here.
         # find Lmax and A
         x = lambda L, A: -A*integrate.quad(lambda theta: np.sin(theta**2/2), 0, L/A)[0] + radius
         y = lambda L, A:  A*integrate.quad(lambda theta: np.cos(theta**2/2), 0, L/A)[0]
@@ -33,6 +29,8 @@ class Bend(Component):
         f = lambda A: x(Lmax(A), A) - y(Lmax(A), A) # constrain of ending at 45 degrees
         A = optimize.newton(f, 10)
         Lmax = Lmax(A)
+        
+        self.length = 2*Lmax
 
         # parametric functions of Euler curve
         def curve(u):
@@ -64,7 +62,7 @@ class Bend(Component):
         curve_all = curve1 + curve2
         
         # generate gdspy object
-        wg3 = gdspy.FlexPath(curve_all, width, gdsii_path=True, layer=self.layer[0])
+        wg3 = gdspy.FlexPath(curve_all, width, gdsii_path=True, layer=layer)
         
         # Update self.obj with new objects
         self.obj.append(wg3)

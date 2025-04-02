@@ -1,4 +1,4 @@
-## Component Name : Gc_fully
+## Component Name : FGC
 Author : Chung-Yu Hsu
 
 - Fully etched broadband focusing grating coupler (FGC)

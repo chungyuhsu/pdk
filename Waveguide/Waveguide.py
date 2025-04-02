@@ -14,14 +14,11 @@ class Waveguide(Component):
         
         # Attributes
         self.obj = []
-        self.port = {'og': (0, 0, 0)}
-        self.layer = [layer]
-        
-        self.width_in = width_in
-        self.width_out = width_out
+        self.port = {}
+
         self.length = length
 
-        # Draw your design here. Everything respects to port 'og'.
+        # Draw your design here.
         path = gdspy.Path(width_in)
         path.segment(length, final_width=width_out, layer=layer)
         

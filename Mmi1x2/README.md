@@ -1,4 +1,4 @@
-## Component Name : Mmi1x2
+## Component Name : MMI1X2
 Author : Chung-Yu Hsu
 
 - 50:50 1×2 MMI splitter

@@ -1,20 +1,19 @@
 import gdspy
 from Component.Component import Component
 
-class Mmi2x2(Component):
+class MMI2X2(Component):
     """
     Loss is ≤0.15±0.01 dB for 1530-1565 nm.\n
     Ref: https://doi.org/10.1109/JPHOT.2012.2230320
     """
     
-    def __init__(self) -> None:
+    def __init__(self, layer: int=12) -> None:
         
         # Attributes
         self.obj = []
-        self.port = {'og': (0, 0, 0)}
-        self.layer = [12]
+        self.port = {}
 
-        # Draw your design here. Everything respects to port 'og'.
+        # Draw your design here.
         vtx = [(0, -0.25),
                (-1, -0.25),
                (-1, -1.75),
@@ -36,7 +35,7 @@ class Mmi2x2(Component):
                (-1, 0.25),
                (0, 0.25)]
 
-        mmi = gdspy.Polygon(vtx, layer=self.layer[0])
+        mmi = gdspy.Polygon(vtx, layer=layer)
         
         # Update self.obj with new objects
         self.obj.append(mmi)

@@ -76,7 +76,7 @@ def unitCell(og, shift=False, r=10, phi=pi/6,
     
     return vtx_cartesian_set # [vtx for gdspy object1, vtx for gdspy object2,...]
 
-class Gc_fully(Component):
+class FGC(Component):
     """
     Fully etched broadband focusing grating coupler (FGC)\n
     **xperiod** : The period of the first unit cell in x-direction\n
@@ -100,9 +100,9 @@ class Gc_fully(Component):
         
         # Attributes
         self.obj = []
-        self.port = {'og': (0, 0, 0)}
+        self.port = {}
 
-        # Draw your design here. Everything respects to port 'og'.
+        # Draw your design here.
 
         # abbreviation
         xp = xperiod
@@ -127,11 +127,6 @@ class Gc_fully(Component):
         # calculate number of periods in r-direction
         Ndr = round(Lgra / dr)
         Lgra = Ndr * dr
-        
-        # 1um WG at the input
-        wg = gdspy.Path(Wwg, initial_point=(-1, 0))
-        wg.segment(1, layer=layer)
-        self.obj.append(wg)
         
         # slab in front of the grating
         vtx = []
@@ -177,4 +172,4 @@ class Gc_fully(Component):
                     self.obj.append(gdspy.Polygon(k, layer=layer))
         
         # Update self.port
-        self.port.update({'o0': (-1, 0, 0)})
+        self.port.update({'o0': (0, 0, 0)})
