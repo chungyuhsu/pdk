@@ -17,3 +17,5 @@
 
 # Allow folder structure so that Git can track the whitelisted files
 !*/
+
+.vscode
