@@ -5,68 +5,129 @@ import numpy as np
 pi = np.pi
 from Component.Component import Component
 
+def euler(radius: float, final_angle: float):
+    """
+    **radius** : Effective bend radius
+    **final_angle** : 0° ~ 90°
+    """
+
+    # Parametric function of Euler curve
+    x = lambda s, R0: integrate.quad(lambda t: np.cos(t**2 / (2 * R0**2)), 0, s)[0]
+    y = lambda s, R0: integrate.quad(lambda t: np.sin(t**2 / (2 * R0**2)), 0, s)[0]
+    dx = lambda s, R0: np.cos(s**2 / (2 * R0**2))
+    dy = lambda s, R0: np.sin(s**2 / (2 * R0**2))
+
+    # s(θ) = R0 * √(2 * θ)
+    s = lambda theta, R0: R0 * np.sqrt(2 * theta)
+
+    # ---------- Find R0 ----------
+    # CONDITION 1: θ(s_max) = 45 degrees
+    s_max = lambda R0: s(45 / 180 * pi, R0)
+    
+    # CONDITION 2: y(s_max) = -x(s_max) + radius
+    f = lambda R0: x(s_max(R0), R0) + y(s_max(R0), R0) - radius
+    
+    # Solve R0 by Newton method around R0 = 10
+    R0 = optimize.newton(f, 10)
+    # -----------------------------
+
+    s_max = s_max(R0)
+
+    # We do not use Euler curve directly for bends.
+    # We merge two Euler curves, one is 0° ~ 45° and the other is 45° ~ 0° (mirror)
+    def curve_function(u):
+        """
+        0 ≤ u ≤ 1
+        """
+        
+        # Decide s from final_angle
+        if final_angle <= 45:
+
+            s_ = s(final_angle / 180 * pi, R0)
+            s_ = u * s_
+
+        elif final_angle > 45:
+            
+            s_ = 2 * s_max - s((90 - final_angle) / 180 * pi, R0)
+            s_ = u * s_
+
+        # Decide x and y from s
+        if s_ <= s_max:
+            
+            # 0° ~ 45° Euler curve
+            x_ = x(s_, R0)
+            y_ = y(s_, R0)
+        
+        elif s_ > s_max:
+            
+            # 45° ~ 0° Euler curve with mirror
+            x_ = -y(2 * s_max - s_, R0) + radius
+            y_ = -x(2 * s_max - s_, R0) + radius
+            
+        return (x_, y_)
+
+    def curvature_function(u):
+        """
+        0 ≤ u ≤ 1
+        """
+
+        # Decide s from final_angle
+        if final_angle <= 45:
+            
+            s_ = s(final_angle / 180 * pi, R0)
+            s_ = u * s_
+
+        elif final_angle > 45:
+            
+            s_ = 2 * s_max - s((90 - final_angle) / 180 * pi, R0)
+            s_ = u * s_
+
+        # Decide dx and dy from s
+        if s_ <= s_max:
+            
+            # 0° ~ 45° Euler curve
+            dx_ = dx(s_, R0)
+            dy_ = dy(s_, R0)
+        
+        elif s_ > s_max:
+            
+            # 45° ~ 0° Euler curve with mirror
+            dx_ = dy(2 * s_max - s_, R0)
+            dy_ = dx(2 * s_max - s_, R0)
+
+        return (dx_, dy_)
+
+    return curve_function, curvature_function
+
 class Bend(Component):
     """
     Bend with Euler curve (Adiabatic bend)\n
     **radius** : Effective bend radius\n
     **width** : Width of waveguide\n
-    Ref:\n
-    https://doi.org/10.1364/OL.476873\n
-    https://doi.org/10.1364/OE.25.009150
+    **final_angle** : Final turning angle 0° ~ 90°\n
+    Ref: https://doi.org/10.1364/OL.476873
     """
-    
-    def __init__(self, radius: float=14, width: float=1.2, layer: int=12) -> None:
+
+    def __init__(self, radius: float=14, width: float=1.2, final_angle: float=90, layer: int=12) -> None:
         
         # Attributes
         self.obj = []
         self.port = {}
-        
-        # Draw your design here.
-        # find Lmax and A
-        x = lambda L, A: -A*integrate.quad(lambda theta: np.sin(theta**2/2), 0, L/A)[0] + radius
-        y = lambda L, A:  A*integrate.quad(lambda theta: np.cos(theta**2/2), 0, L/A)[0]
-        Lmax = lambda A: A*np.sqrt(pi/2) # constrain of ending at slope=-1
-        f = lambda A: x(Lmax(A), A) - y(Lmax(A), A) # constrain of ending at 45 degrees
-        A = optimize.newton(f, 10)
-        Lmax = Lmax(A)
-        
-        self.length = 2*Lmax
 
-        # parametric functions of Euler curve
-        def curve(u):
-            x = lambda L, A: -A*integrate.quad(lambda theta: np.sin(theta**2/2), 0, L/A)[0]
-            y = lambda L, A:  A*integrate.quad(lambda theta: np.cos(theta**2/2), 0, L/A)[0]
-            L = Lmax*u
-            x = x(L, A)
-            y = y(L, A)
-            return (y, -x)
-
-        # generate curve1 points
-        number_of_pts = 100
-        curve1 = []
-        for i in range(number_of_pts):
-            x = curve(i/(number_of_pts-1))[0]
-            y = curve(i/(number_of_pts-1))[1]
-            curve1.append((x, y))
-
-        # generate curve2 points
-        curve2 = []
-        for i in curve1:
-            x = -i[1] + radius
-            y = -i[0] + radius
-            curve2.append((x, y))
+        # Generate gdspy object
+        curve = euler(radius, final_angle)
+        curve_function = curve[0]
+        curvature_function = curve[1]
         
-        # merge curve1 and curve2 to ensure continuity.
-        curve2.pop(-1)
-        curve2.reverse()
-        curve_all = curve1 + curve2
-        
-        # generate gdspy object
-        wg3 = gdspy.FlexPath(curve_all, width, gdsii_path=True, layer=layer)
-        
+        wg = gdspy.Path(width)
+        wg.parametric(curve_function,
+                      curve_derivative=curvature_function,
+                      tolerance=0.001,
+                      layer=layer)
+    
         # Update self.obj with new objects
-        self.obj.append(wg3)
+        self.obj.append(wg)
 
         # Update self.port
         self.port.update({'o0': (0, 0, 0),
-                          'o1': (radius, radius, 90)})
+                          'o1': (wg.x, wg.y, final_angle)})

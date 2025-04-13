@@ -1,5 +1,7 @@
 import gdspy
-from Template.Template import Template
+from AlignEBL.AlignEBL import AlignEBL
 
-Template().put('og', (0, 0, 0))
-gdspy.write_gds('Template.gds')
+align = AlignEBL()
+align.put('og', (0, 0, 0))
+
+gdspy.write_gds('AlignEBL.gds')
