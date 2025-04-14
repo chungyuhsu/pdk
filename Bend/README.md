@@ -14,3 +14,5 @@ Author : Chung-Yu Hsu
 **radius** : Effective bend radius
 
 **width** : Width of waveguide
+
+**final_angle** : Final turning angle -90° ~ 90°. Minus means right turn.

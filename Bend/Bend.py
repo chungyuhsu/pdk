@@ -8,7 +8,7 @@ from Component.Component import Component
 def euler(radius: float, final_angle: float):
     """
     **radius** : Effective bend radius
-    **final_angle** : 0° ~ 90°
+    **final_angle** : -90° ~ 90°
     """
 
     # Parametric function of Euler curve
@@ -35,6 +35,18 @@ def euler(radius: float, final_angle: float):
 
     # We do not use Euler curve directly for bends.
     # We merge two Euler curves, one is 0° ~ 45° and the other is 45° ~ 0° (mirror)
+    
+    # If final_angle < 0, turn right.
+    # If final_angle > 0, turn left.
+    if final_angle < 0:
+        
+        final_angle = -final_angle
+        sign = -1
+    
+    else: # final_angle >= 0
+        
+        sign = 1
+
     def curve_function(u):
         """
         0 ≤ u ≤ 1
@@ -64,6 +76,9 @@ def euler(radius: float, final_angle: float):
             x_ = -y(2 * s_max - s_, R0) + radius
             y_ = -x(2 * s_max - s_, R0) + radius
             
+        # If turn right, let y_ = -y_
+        y_ = sign * y_
+        
         return (x_, y_)
 
     def curvature_function(u):
@@ -95,6 +110,9 @@ def euler(radius: float, final_angle: float):
             dx_ = dy(2 * s_max - s_, R0)
             dy_ = dx(2 * s_max - s_, R0)
 
+        # If turn right, let dy_ = -dy_
+        dy_ = sign * dy_
+        
         return (dx_, dy_)
 
     return curve_function, curvature_function
@@ -104,7 +122,7 @@ class Bend(Component):
     Bend with Euler curve (Adiabatic bend)\n
     **radius** : Effective bend radius\n
     **width** : Width of waveguide\n
-    **final_angle** : Final turning angle 0° ~ 90°\n
+    **final_angle** : Final turning angle -90° ~ 90°. Minus means right turn.\n
     Ref: https://doi.org/10.1364/OL.476873
     """
 
